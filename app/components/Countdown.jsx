@@ -1,6 +1,7 @@
 var React = require('react');
 var Clock = require('Clock');
 var CountdownForm = require('CountdownForm');
+var Controls = require('Controls');
 
 var Countdown = React.createClass({
     getDefaultProps: function () {
@@ -20,13 +21,29 @@ var Countdown = React.createClass({
             this.setState({
                seconds: newSeconds >= 0 ? newSeconds : 0
             });
+            if (this.state.seconds === 0) {
+                this.setState({
+                    countdownStatus: 'stopped'
+                });
+            }
         }, 1000);
+    },
+    stopTimer: function () {
+        this.setState({
+            seconds: 0
+        });
     },
     componentDidUpdate: function (prevProps, prevState) {
         if (this.state.countdownStatus !== prevState.countdownStatus) {
             switch (this.state.countdownStatus) {
                 case 'started':
                     this.startTimer();
+                    break;
+                case 'stopped':
+                    this.stopTimer();
+                case 'paused':
+                    clearTimeout(this.timer);
+                    this.timer = undefined;
                     break;
             }
         }
@@ -37,12 +54,24 @@ var Countdown = React.createClass({
             countdownStatus: 'started'
         });
     },
+    handleStatusChange: function (newStatus) {
+        this.setState({
+            countdownStatus: newStatus
+        })
+    },
     render: function () {
-        var {seconds} = this.state;
+        var {seconds, countdownStatus} = this.state;
+        var renderControlArea = () => {
+            if (countdownStatus !== 'stopped') {
+                return <Controls countdownStatus={countdownStatus} onStatusChange={this.handleStatusChange}/>;
+            } else {
+                return <CountdownForm onSetCountdown={this.handleSetCountdown}/>;
+            }
+        };
         return (
             <div>
                 <Clock totalSeconds={seconds}/>
-                <CountdownForm onSetCountdown={this.handleSetCountdown}/>
+                {renderControlArea()}
             </div>
         )
     }

@@ -2,6 +2,11 @@ var webpackConfig = require('./webpack.config.js');
 
 module.exports = function (config) {
     config.set({
+        browserConsoleLogOptions: {
+            level: "debug",
+            format: "%b %T: %m",
+            terminal: true
+        },
         browsers: ['Chrome'],
         singleRun: true,
         frameworks: ['mocha'],
